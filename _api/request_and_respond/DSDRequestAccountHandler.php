@@ -12,22 +12,26 @@ require_once "../account_management/DSDAuthorizationChecker.php";
 
 class DSDRequestAccountHandler{
     public static function register(){
+        self::registerAccount(DSDAccountManager::USER);
+    }
+
+    public static function registerAccount($type){
+        if (!Utils::is_email($GLOBALS["data"]["email"])) {
+            DSDRequestResponder::respond(false, "Email格式错误");
+        }
+        if (strtolower($GLOBALS["data"]["password"]) == "d41d8cd98f00b204e9800998ecf8427e") {
+            DSDRequestResponder::respond(false, "密码不能为空");
+        }
+        if (strlen($GLOBALS["data"]["username"]) > 30) {
+            DSDRequestResponder::respond(false, "用户名过长");
+        }
         Utils::ensureKeys($GLOBALS["data"], ["username", "email", "password"]);
-        if(!$uid=DSDAccountManager::addAccount($GLOBALS["data"]["username"], $GLOBALS["data"]["email"], DSDAccountManager::USER, $GLOBALS["data"]["password"])){
-            DSDRequestResponder::respond(false, "email已经被注册过了");
+        if(!$uid=DSDAccountManager::addAccount($GLOBALS["data"]["username"], $GLOBALS["data"]["email"],$type, $GLOBALS["data"]["password"])){
+            DSDRequestResponder::respond(false, "Email已经被注册过了");
         }
         DSDRequestResponder::respond(true, null, DSDAccountManager::issueAccessTokenWithID($uid));
     }
-    public static function registerAdmin(){
-        if($GLOBALS["data"]["password"]!=$GLOBALS['admin_password']){
-            DSDRequestResponder::respond(false, "Password is not correct!");
-        }
-        Utils::ensureKeys($GLOBALS["data"], ["username", "email", "password"]);
-        if(!$uid=DSDAccountManager::addAccount($GLOBALS["data"]["username"], $GLOBALS["data"]["email"], DSDAccountManager::ADMIN, $GLOBALS["data"]["password"])){
-            DSDRequestResponder::respond(false, "email已经被注册过了");
-        }
-        DSDRequestResponder::respond(true, null, DSDAccountManager::issueAccessTokenWithID($uid));
-    }
+
     public static function login(){
         self::loginWithType(DSDAccountManager::USER);
     }

@@ -52,10 +52,12 @@ class DSDGoodsManager {
 
     static function restore_info(&$goods) {
         $json = $goods["info"];
-        $goods["info"] = json_decode($json, true);
+        if (strlen($json) > 0) {
+            $goods["info"] = json_decode($json, true);
+        }
     }
 
-    static function add_goods($name, $cid, $info, $abstract, $description, $remains) {
+    static function add_goods($name, $cid, $info, $abstract, $description) {
         DSDDatabaseConnector::insert(
             "goods",
             array(
@@ -64,14 +66,13 @@ class DSDGoodsManager {
                 "info" => $info,
                 "abstract" => $abstract,
                 "description" => $description,
-                "remains" => intval($remains) > 1 ? intval($remains) : 1,
                 "timestamp" => time()
             )
         );
         return DSDDatabaseConnector::getInsertId();
     }
 
-    static function update_goods($gid, $name, $cid, $info, $abstract, $description, $remains) {
+    static function update_goods($gid, $name, $cid, $info, $abstract, $description) {
         DSDDatabaseConnector::update(
             "goods",
             array(
@@ -80,7 +81,6 @@ class DSDGoodsManager {
                 "info" => $info,
                 "abstract" => $abstract,
                 "description" => $description,
-                "remains" => intval($remains) > 1 ? intval($remains) : 1,
             ),
             "gid=:gid",
             array(":gid" => $gid)
